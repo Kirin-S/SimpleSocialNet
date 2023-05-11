@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1084087578452",
+    "project_id": "simplesocialnet-e94de",
+    "storage_bucket": "simplesocialnet-e94de.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1084087578452:android:869069bdb9b175a262a2c1",
+        "android_client_info": {
+          "package_name": "com.simplesocialnet"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1084087578452-e4m9nkn6sgt3kcsh8255b5g83f0ggheo.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDMYmec8qlNiWv1AUyhQxTt7QxRGcotDyw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1084087578452-37hmkt3ilb43rli0vfa1mfvbut9n4d4s.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
