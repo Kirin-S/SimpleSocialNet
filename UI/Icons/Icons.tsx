@@ -15,6 +15,8 @@ const Icons: FC<IIcons> = ({icon}) => {
     settingsOutlined: require(`../../static/icons/settingsOutlined.png`),
     news: require(`../../static/icons/news.png`),
     newsOutlined: require(`../../static/icons/newsOutlined.png`),
+    heartOutlined: require(`../../static/icons/heartOutlined.png`),
+    heartRed: require(`../../static/icons/heartRed.png`),
   }
 
   return (
