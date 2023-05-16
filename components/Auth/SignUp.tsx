@@ -2,6 +2,7 @@ import { View } from 'react-native';
 import { TextInput, Button, Text } from 'react-native-paper';
 import React, { useState } from 'react';
 import auth from '@react-native-firebase/auth';
+import { validateEmail } from '../../lib/lib';
 
 interface ISignUpProps {
   setErrText: any;
@@ -15,20 +16,11 @@ const SignUp = (props: ISignUpProps) => {
   const [repeatPass, setRepeatPass] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  function validateEmail(email: string): boolean {
-    var pattern = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-
-    return pattern.test(email);
-  }
-
   const login = () => {
     setIsLoading(true);
     if (validateEmail(email) && pass.length > 5 && repeatPass.length > 5 && pass === repeatPass) {
       auth()
         .createUserWithEmailAndPassword(email, pass)
-        .then(() => {
-          console.log('User signed and logged in!');
-        })
         .catch((err) => {
           if (err.code === 'auth/email-already-in-use') {
             props.setErrText('That email is already in use');

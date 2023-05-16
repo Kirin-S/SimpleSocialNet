@@ -1,18 +1,30 @@
 import React, { useState, useEffect } from 'react';
 import auth from '@react-native-firebase/auth';
-import { View, Text, Button } from 'react-native';
+import { Text } from 'react-native';
 import Auth from './components/Auth/Auth';
+import { BottomNavigation } from 'react-native-paper';
+import Profile from './components/Profile/Profile';
+import Icons from './UI/Icons/Icons';
 
 
 function App() {
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const [index, setIndex] = useState(0);
 
-  const logout = () => {
-    auth()
-      .signOut()
-      .then(() => console.log("User signed out"))
-  }
+  const routes = [
+    { key: 'news', title: 'News', focusedIcon: () => <Icons icon='news' />, unfocusedIcon: () => <Icons icon='newsOutlined' /> },
+    { key: 'favorites', title: 'Favorites', focusedIcon: () => <Icons icon='favorites' />, unfocusedIcon: () => <Icons icon='favoritesOutlined' /> },
+    { key: 'profile', title: 'Profile', focusedIcon: () => <Icons icon='user' />, unfocusedIcon: () => <Icons icon='userOutlined' /> },
+    { key: 'settings', title: 'Settings', focusedIcon: () => <Icons icon='settings' />, unfocusedIcon: () => <Icons icon='settingsOutlined' /> },
+  ];
+
+  const renderScene = BottomNavigation.SceneMap({
+    news: () => <Text>News</Text>,
+    favorites: () => <Text>Favorites</Text>,
+    profile: () => <Profile />,
+    settings: () => <Text>Settings</Text>
+  });
 
   // Handle user state changes
   function onAuthStateChanged(user: any) {
@@ -22,7 +34,7 @@ function App() {
 
   useEffect(() => {
     const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
-    return subscriber; // unsubscribe on unmount
+    return subscriber; // Unsubscribe on unmount
   }, []);
 
   if (initializing) return null;
@@ -34,10 +46,11 @@ function App() {
   }
 
   return (
-    <View>
-      <Text>{user.email}</Text>
-      <Button title='Logout' onPress={logout}></Button>
-    </View>
+    <BottomNavigation
+      navigationState={{ index, routes }}
+      onIndexChange={setIndex}
+      renderScene={renderScene}
+    />
   );
 }
 
