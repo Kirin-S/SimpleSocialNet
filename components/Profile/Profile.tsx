@@ -1,18 +1,40 @@
 import { View, Text, StyleSheet, Image, Dimensions } from 'react-native';
 import React, { FC, useState } from 'react';
-import { Button, TextInput } from 'react-native-paper';
+import { Button, TextInput, IconButton } from 'react-native-paper';
+import Icons from '../../UI/Icons/Icons';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 
 interface IProfile {
   nickname?: string;
   imageUri?: string;
+  setUserNick: any;
 }
 
-const Profile: FC<IProfile> = ({ nickname, imageUri }) => {
+const Profile: FC<IProfile> = ({ nickname, imageUri, setUserNick }) => {
   const [nick, setNick] = useState('');
+  const [isEdit, setIsEdit] = useState(false);
 
   const onSaveNick = () => {
-    // Server saving...
-
+    firestore()
+      .collection('Users')
+      .doc(auth().currentUser?.uid)
+      .set({
+        nickname: nick
+      })
+      .then(() => {
+        firestore()
+          .collection('Users')
+          .doc(auth().currentUser?.uid)
+          .get()
+          .then(res => {
+            const data = res.data();
+            if (data?.nickname) {
+              setUserNick(data.nickname);
+              setIsEdit(false);
+            }
+          });
+      })
   }
 
   return (
@@ -24,16 +46,16 @@ const Profile: FC<IProfile> = ({ nickname, imageUri }) => {
       />
       <Button onPress={() => console.log('ban')}>Change Profile Image</Button>
       {
-        nickname
-          ? <Text style={styles.nickname}>{nickname}</Text>
+        nickname && !isEdit
+          ? <View style={styles.nicknameBox}>
+              <Text style={styles.nickname}>{nickname}</Text>
+              <IconButton style={styles.editNick} onPress={() => setIsEdit(true)} icon={() => <Icons icon='editOutlined' />} />
+            </View>
           : <View style={styles.changeNickView}>
               <TextInput style={styles.nickInput} label='Set nickname' value={nick} onChangeText={text => setNick(text)} />
               <Button onPress={onSaveNick}>Save</Button>
             </View>
       }
-      
-
-      {/* <Button onPress={logout}>Logout</Button> */}
     </View>
   )
 }
@@ -50,9 +72,15 @@ const styles = StyleSheet.create({
     borderRadius: Math.round(Dimensions.get('window').width + Dimensions.get('window').height / 2),
   },
   nickname: {
-    marginTop: 80,
     fontSize: 30,
     fontWeight: 'bold'
+  },
+  nicknameBox: {
+    marginTop: 80,
+    flexDirection: 'row'
+  },
+  editNick: {
+    marginTop: 0
   },
   changeNickView: {
     width: '95%'

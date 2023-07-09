@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 import { Text } from 'react-native';
 import Auth from './components/Auth/Auth';
 import { BottomNavigation } from 'react-native-paper';
@@ -13,9 +14,7 @@ function App() {
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [index, setIndex] = useState(0);
-  const [userData, setUserData] = useState({
-    nickName: 'Armored Hollow'
-  })
+  const [userNick, setUserNick] = useState('');
 
   const routes = [
     { key: 'news', title: 'News', focusedIcon: () => <Icons icon='news' />, unfocusedIcon: () => <Icons icon='newsOutlined' /> },
@@ -27,7 +26,7 @@ function App() {
   const renderScene = BottomNavigation.SceneMap({
     news: () => <News />,
     favorites: () => <Text>Favorites</Text>,
-    profile: () => <Profile nickname={userData.nickName} />,
+    profile: () => <Profile nickname={userNick} setUserNick={setUserNick} />,
     settings: () => <Settings />
   });
 
@@ -39,8 +38,29 @@ function App() {
 
   useEffect(() => {
     const subscriber = auth().onAuthStateChanged(onAuthStateChanged);
+
     return subscriber; // Unsubscribe on unmount
   }, []);
+
+  const getUserInfo = async () => {
+    await firestore()
+      .collection('Users')
+      .doc(auth().currentUser?.uid)
+      .get()
+      .then(res => {
+        const data = res.data();
+        if (data?.nickname) {
+          setUserNick(data.nickname);
+        }
+      });
+  }
+
+  // For nickname
+  useEffect(() => {
+    setTimeout(() => {
+      getUserInfo();
+    }, 500)
+  }, [])
 
   if (initializing) return null;
 

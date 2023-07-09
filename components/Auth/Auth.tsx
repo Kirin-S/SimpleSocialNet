@@ -1,5 +1,4 @@
 import { View, Text } from 'react-native';
-import { TextInput, Button } from 'react-native-paper';
 import React, { useState } from 'react'
 import Login from './Login';
 import SignUp from './SignUp';
