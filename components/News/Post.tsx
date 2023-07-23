@@ -1,32 +1,108 @@
-import { View, Text, StyleSheet, Image } from 'react-native';
-import React, { FC } from 'react';
+import { View, Text, StyleSheet, Image, Alert } from 'react-native';
+import React, { FC, useState } from 'react';
 import Icons from '../../UI/Icons/Icons';
 import { IconButton } from 'react-native-paper';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
 
 
 interface IPost {
-  title: string;
-  description: string;
+  posts: any;
+  post: {
+    title: string;
+    description: string;
+    imgLink?: string;
+    id: number;
+    like: boolean;
+    show: boolean;
+  };
+  setPosts: any;
 }
 
-const Post: FC<IPost> = ({ title, description }) => {
+const Post: FC<IPost> = ({ posts, post, setPosts }) => {
+  const [isLoading, setIsLoading] = useState(false);
   
-  const onLike = (id: string): void => {
-    console.log(`LIKED ${id}`);
+  const onLike = () => {
+    firestore()
+      .collection('News')
+      .doc(auth().currentUser?.uid)
+      .update({
+        posts: posts.map((item: any) => {
+          if (item.id === post.id) {
+            return {...item, like: !post.like}
+          } else return item;
+        })
+      })
+      .then(() => {
+        firestore()
+          .collection('News')
+          .doc(auth().currentUser?.uid)
+          .get()
+          .then(res => {
+            const data = res.data();
+            if (data?.posts) {
+              setPosts(data.posts);
+            }
+          });
+      })
+  }
+
+  const onRemovePost = () => {
+    Alert.alert('Alert', 'Sure?', [
+      {
+        text: 'OK', onPress: () => removePost()
+      },
+      {
+        text: 'cancel', onPress: () => null
+      },
+    ]);
+  }
+
+  const removePost = () => {
+    setIsLoading(true);
+    
+    firestore()
+      .collection('News')
+      .doc(auth().currentUser?.uid)
+      .update({
+        posts: posts.map((item: any) => {
+          if (item.id === post.id) {
+            return {...item, show: false}
+          } else return item;
+        })
+      })
+      .then(() => {
+        firestore()
+          .collection('News')
+          .doc(auth().currentUser?.uid)
+          .get()
+          .then(res => {
+            const data = res.data();
+            if (data?.posts) {
+              setPosts(data.posts);
+            }
+          });
+      })
+      .finally(() => setIsLoading(false));
   }
 
   return (
-    <View style={styles.post}>
-      <Image
-        source={{
-          uri: 'https://sun1-23.userapi.com/impg/c857616/v857616347/1683dc/nAgyz1ZWOqg.jpg?size=2157x2160&quality=96&sign=a43d5c616bba0fd531797350b0d8c785&type=album'
-        }}
-        alt='Image Error'
-        style={styles.image}
-      />
-      <Text style={styles.title}>{title}</Text>
-      <Text numberOfLines={3} ellipsizeMode='tail'>{description}</Text>
-      <IconButton style={styles.like} onPress={() => onLike(title)} icon={() => <Icons icon='heartOutlined' />} />
+    <View style={!isLoading ? styles.post : {...styles.post, backgroundColor: '#bbb'}}>
+      <View style={styles.iconBox}>
+        <IconButton style={styles.remove} onPress={onRemovePost} icon={() => <Icons icon='remove' />} />
+      </View>
+      <View style={styles.postData}>
+        <Image
+          source={{
+            uri: post.imgLink
+          }}
+          alt='Image Error'
+          style={styles.image}
+        />
+        <Text style={styles.title}>{post.title}</Text>
+        <Text style={styles.description} numberOfLines={3} ellipsizeMode='tail'>{post.description}</Text>
+        <IconButton style={styles.like} onPress={onLike} icon={() => <Icons icon={post.like ? 'heartRed' : 'heartOutlined'} />} />
+      </View>    
     </View>
   )
 }
@@ -37,22 +113,38 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#000',
     marginBottom: 15,
-    padding: 15,
     width: '100%',
     height: 400
   },
+  postData: {
+    padding: 15,
+  },
   title: {
     fontSize: 22,
-    fontWeight: 'bold'
+    fontWeight: 'bold',
+    marginLeft: 10
+  },
+  description: {
+    marginLeft: 10
   },
   like: {
-    marginLeft: -5
+    marginLeft: 5,
+    marginTop: -2.5
   },
   image: {
     width: '100%',
     height: '60%',
     marginBottom: 20,
     borderRadius: 10
+  },
+  iconBox: {
+    alignItems: 'flex-end',
+    marginBottom: 10,
+    marginLeft: 30
+  },
+  remove: {
+    padding: 0,
+    margin: 0
   }
 })
 

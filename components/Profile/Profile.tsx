@@ -6,12 +6,12 @@ import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 
 interface IProfile {
-  nickname?: string;
+  userData?: any;
   imageUri?: string;
-  setUserNick: any;
+  setUserData: any;
 }
 
-const Profile: FC<IProfile> = ({ nickname, imageUri, setUserNick }) => {
+const Profile: FC<IProfile> = ({ userData, imageUri, setUserData }) => {
   const [nick, setNick] = useState('');
   const [isEdit, setIsEdit] = useState(false);
 
@@ -30,7 +30,7 @@ const Profile: FC<IProfile> = ({ nickname, imageUri, setUserNick }) => {
           .then(res => {
             const data = res.data();
             if (data?.nickname) {
-              setUserNick(data.nickname);
+              setUserData(data);
               setIsEdit(false);
             }
           });
@@ -46,9 +46,9 @@ const Profile: FC<IProfile> = ({ nickname, imageUri, setUserNick }) => {
       />
       <Button onPress={() => console.log('ban')}>Change Profile Image</Button>
       {
-        nickname && !isEdit
+        userData.nickname && !isEdit
           ? <View style={styles.nicknameBox}>
-              <Text style={styles.nickname}>{nickname}</Text>
+              <Text style={styles.nickname}>{userData.nickname}</Text>
               <IconButton style={styles.editNick} onPress={() => setIsEdit(true)} icon={() => <Icons icon='editOutlined' />} />
             </View>
           : <View style={styles.changeNickView}>
@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold'
   },
   nicknameBox: {
-    marginTop: 80,
+    marginTop: 50,
     flexDirection: 'row'
   },
   editNick: {

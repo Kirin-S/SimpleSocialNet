@@ -1,32 +1,33 @@
 import React, { useState, useEffect } from 'react';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
-import { Text } from 'react-native';
 import Auth from './components/Auth/Auth';
 import { BottomNavigation } from 'react-native-paper';
 import Profile from './components/Profile/Profile';
 import Icons from './UI/Icons/Icons';
 import News from './components/News/News';
 import Settings from './components/SettingsScene/Settings';
+import { NavigationContainer } from '@react-navigation/native';
+import People from './components/People/People';
 
 
 function App() {
   const [initializing, setInitializing] = useState(true);
   const [user, setUser] = useState<any>(null);
   const [index, setIndex] = useState(0);
-  const [userNick, setUserNick] = useState('');
+  const [userData, setUserData] = useState({});
 
   const routes = [
     { key: 'news', title: 'News', focusedIcon: () => <Icons icon='news' />, unfocusedIcon: () => <Icons icon='newsOutlined' /> },
-    { key: 'favorites', title: 'Favorites', focusedIcon: () => <Icons icon='favorites' />, unfocusedIcon: () => <Icons icon='favoritesOutlined' /> },
+    { key: 'people', title: 'People', focusedIcon: () => <Icons icon='people' />, unfocusedIcon: () => <Icons icon='peopleOutlined' /> },
     { key: 'profile', title: 'Profile', focusedIcon: () => <Icons icon='user' />, unfocusedIcon: () => <Icons icon='userOutlined' /> },
     { key: 'settings', title: 'Settings', focusedIcon: () => <Icons icon='settings' />, unfocusedIcon: () => <Icons icon='settingsOutlined' /> },
   ];
 
   const renderScene = BottomNavigation.SceneMap({
     news: () => <News />,
-    favorites: () => <Text>Favorites</Text>,
-    profile: () => <Profile nickname={userNick} setUserNick={setUserNick} />,
+    people: () => <People userData={userData} />,
+    profile: () => <Profile userData={userData} setUserData={setUserData} />,
     settings: () => <Settings />
   });
 
@@ -42,24 +43,18 @@ function App() {
     return subscriber; // Unsubscribe on unmount
   }, []);
 
-  const getUserInfo = async () => {
-    await firestore()
+  useEffect(() => {
+    firestore()
       .collection('Users')
       .doc(auth().currentUser?.uid)
       .get()
       .then(res => {
         const data = res.data();
+        console.log(data)
         if (data?.nickname) {
-          setUserNick(data.nickname);
+          setUserData(data);
         }
       });
-  }
-
-  // For nickname
-  useEffect(() => {
-    setTimeout(() => {
-      getUserInfo();
-    }, 500)
   }, [])
 
   if (initializing) return null;
@@ -71,11 +66,13 @@ function App() {
   }
 
   return (
-    <BottomNavigation
-      navigationState={{ index, routes }}
-      onIndexChange={setIndex}
-      renderScene={renderScene}
-    />
+    <NavigationContainer>
+      <BottomNavigation
+        navigationState={{ index, routes }}
+        onIndexChange={setIndex}
+        renderScene={renderScene}
+      />
+    </NavigationContainer>
   );
 }
 

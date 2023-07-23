@@ -19,6 +19,11 @@ const Icons: FC<IIcons> = ({icon}) => {
     heartRed: require(`../../static/icons/heartRed.png`),
     edit: require(`../../static/icons/writing.png`),
     editOutlined: require(`../../static/icons/writingOutlined.png`),
+    people: require(`../../static/icons/people.png`),
+    peopleOutlined: require(`../../static/icons/peopleOutlined.png`),
+    remove: require(`../../static/icons/remove.png`),
+    add: require(`../../static/icons/add.png`),
+    approve: require(`../../static/icons/approve.png`),
   }
 
   return (

@@ -1,34 +1,56 @@
-import { SafeAreaView, FlatList, Text, StyleSheet } from 'react-native';
-import React from 'react';
-import Post from './Post';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import PostList from './PostList';
+import NewPost from './NewPost';
+import { useState, useEffect } from 'react';
+import auth from '@react-native-firebase/auth';
+import firestore from '@react-native-firebase/firestore';
+
+
+const Stack = createNativeStackNavigator();
 
 const News = () => {
+  const [posts, setPosts] = useState([]);
 
-  const mochPosts = [
-    { title: 'Post 1', description: 'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Minima sed suscipit dolore nulla eum aliquam alias eos Lorem ipsum dolor sit, amet consectetur adipisicing elit. Minima sed suscipit dolore nulla eum aliquam alias eos' },
-    { title: 'Post 2', description: 'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Minima sed suscipit dolore nulla eum aliquam alias eos' },
-    { title: 'Post 3', description: 'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Minima sed suscipit dolore nulla eum aliquam alias eos' },
-    { title: 'Post 4', description: 'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Minima sed suscipit dolore nulla eum aliquam alias eos' },
-    { title: 'Post 5', description: 'Lorem ipsum dolor sit, amet consectetur adipisicing elit. Minima sed suscipit dolore nulla eum aliquam alias eos' },
-  ];
+  useEffect(() => {
+    firestore()
+      .collection('News')
+      .doc(auth().currentUser?.uid)
+      .get()
+      .then(res => {
+        const data = res.data();
+        if (data?.posts) {
+          setPosts(data.posts);
+        }
+      });
+  }, [])
 
   return (
-    <SafeAreaView style={styles.news}>
-      <FlatList
-        data={mochPosts}
-        renderItem={({item}) => <Post title={item.title} description={item.description} />}
-        keyExtractor={item => item.title}
-      />
-
-      {/* Floating Button */}
-    </SafeAreaView>
+    <Stack.Navigator initialRouteName='PostList'>
+      <Stack.Screen
+        options={{
+          headerShown: false
+        }}
+        name="PostList"
+      >
+        {(props: any) => <PostList {...props} posts={posts} setPosts={setPosts} />}
+      </Stack.Screen>
+      <Stack.Screen
+        options={{
+          title: 'New Post',
+          headerStyle: {
+            backgroundColor: '#aaa',
+          },
+          headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }}
+        name="NewPost"
+      >
+        {(props: any) => <NewPost {...props} postsLength={posts.length} setPosts={setPosts} />}
+      </Stack.Screen>
+    </Stack.Navigator>
   )
 }
-
-const styles = StyleSheet.create({
-  news: {
-    padding: 10
-  }
-})
 
 export default News
