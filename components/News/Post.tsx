@@ -13,37 +13,60 @@ interface IPost {
     description: string;
     imgLink?: string;
     id: number;
-    like: boolean;
+    like: any;
     show: boolean;
+    creator: string;
   };
   setPosts: any;
+  userData: any;
 }
 
-const Post: FC<IPost> = ({ posts, post, setPosts }) => {
+const Post: FC<IPost> = ({ posts, post, setPosts, userData }) => {
   const [isLoading, setIsLoading] = useState(false);
   
-  const onLike = () => {
+  const onLikeDislike = () => {
+    const isLike = !post.like.includes(auth()?.currentUser?.uid);
+
     firestore()
       .collection('News')
-      .doc(auth().currentUser?.uid)
+      .doc(post.creator)
       .update({
         posts: posts.map((item: any) => {
           if (item.id === post.id) {
-            return {...item, like: !post.like}
+            return {...item, like: isLike ? [...post.like, auth()?.currentUser?.uid] : [...post.like.filter((item: string) => item !== auth()?.currentUser?.uid)]}
           } else return item;
         })
       })
       .then(() => {
-        firestore()
-          .collection('News')
-          .doc(auth().currentUser?.uid)
-          .get()
-          .then(res => {
-            const data = res.data();
-            if (data?.posts) {
-              setPosts(data.posts);
+        const posts: any = [];
+
+        const promise = new Promise((resolve, reject) => {
+          const users = [auth().currentUser?.uid, ...userData.friends];
+
+          users.forEach((id: string, index: number) => {
+            firestore()
+              .collection('News')
+              .doc(id)
+              .get()
+              .then(res => {
+                const data = res.data();
+
+                if (data?.posts) {
+                  posts.push(...data.posts);
+                }
+              })
+              .catch(err => reject(err))
+
+            if (index === users.length - 1) {
+              resolve(posts);
             }
-          });
+          })
+        });
+
+        promise
+          .then((data: any) => setPosts(data))
+          .finally(() => setIsLoading(false))
+
       })
   }
 
@@ -100,8 +123,8 @@ const Post: FC<IPost> = ({ posts, post, setPosts }) => {
           style={styles.image}
         />
         <Text style={styles.title}>{post.title}</Text>
-        <Text style={styles.description} numberOfLines={3} ellipsizeMode='tail'>{post.description}</Text>
-        <IconButton style={styles.like} onPress={onLike} icon={() => <Icons icon={post.like ? 'heartRed' : 'heartOutlined'} />} />
+        <Text style={styles.description} numberOfLines={2} ellipsizeMode='tail'>{post.description}</Text>
+        <IconButton style={styles.like} onPress={onLikeDislike} icon={() => <Icons icon={post.like.includes(auth()?.currentUser?.uid) ? 'heartRed' : 'heartOutlined'} />} />
       </View>    
     </View>
   )

@@ -1,20 +1,23 @@
 import { View, Text, StyleSheet } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import { IconButton } from 'react-native-paper';
 import Icons from '../../UI/Icons/Icons';
 
-const People = ({ userData }: any) => {
+const People = ({ userData, setIsUserInfoChanged }: any) => {
   const [users, setUsers] = useState([]);
 
-  const onAddFriend = (id: string) => {
+  const onAddRemoveFriend = (id: string) => {
+    const isAdd = !userData.friends.includes(id);
+
     firestore()
       .collection('Users')
       .doc(auth().currentUser?.uid)
       .update({
-        friends: firestore.FieldValue.arrayUnion(id)
+        friends: isAdd ? firestore.FieldValue.arrayUnion(id) : firestore.FieldValue.arrayRemove(id)
       })
+      .then(() => setIsUserInfoChanged((prev: boolean) => !prev))
   }
 
 
@@ -31,14 +34,14 @@ const People = ({ userData }: any) => {
 
         setUsers(arr);
       })
-  }, [])
+  }, [userData])
 
   return (
     <View style={styles.peopleScreen}>
       {users.map((user: any) => user.nickname !== userData.nickname && (
         <View key={user.id} style={styles.userView}>
           <Text style={styles.userText}>{user.nickname}</Text>
-          <IconButton onPress={() => onAddFriend(user.id)} icon={() => <Icons icon={userData.friends.includes(user.id) ? 'approve' : 'add'} />} />
+          <IconButton onPress={() => onAddRemoveFriend(user.id)} icon={() => <Icons icon={userData?.friends.includes(user.id) ? 'approve' : 'add'} />} />
         </View>
       ))}
     </View>

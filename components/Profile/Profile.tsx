@@ -20,7 +20,8 @@ const Profile: FC<IProfile> = ({ userData, imageUri, setUserData }) => {
       .collection('Users')
       .doc(auth().currentUser?.uid)
       .set({
-        nickname: nick
+        nickname: nick,
+        friends: userData.friends ?? []
       })
       .then(() => {
         firestore()

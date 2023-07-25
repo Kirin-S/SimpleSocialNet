@@ -3,6 +3,7 @@ import { TextInput, Button, Text } from 'react-native-paper';
 import React, { useState } from 'react';
 import auth from '@react-native-firebase/auth';
 import { validateEmail } from '../../lib/lib';
+import firestore from '@react-native-firebase/firestore';
 
 interface ISignUpProps {
   setErrText: any;
@@ -21,6 +22,15 @@ const SignUp = (props: ISignUpProps) => {
     if (validateEmail(email) && pass.length > 5 && repeatPass.length > 5 && pass === repeatPass) {
       auth()
         .createUserWithEmailAndPassword(email, pass)
+        .then((res) => {
+          firestore()
+            .collection('Users')
+            .doc(res.user.uid)
+            .set({
+              nickname: '',
+              friends: []
+            })
+        })
         .catch((err) => {
           if (err.code === 'auth/email-already-in-use') {
             props.setErrText('That email is already in use');

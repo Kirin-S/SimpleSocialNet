@@ -22,7 +22,8 @@ const NewPost = ({ navigation, setPosts, postsLength }: any) => {
             description: description,
             imgLink: link ? link : 'https://images.barrons.com/im-709895?width=639&size=1.5',
             like: false,
-            show: true
+            show: true,
+            creator: auth().currentUser?.uid
           })
         })
         .then(() => {
