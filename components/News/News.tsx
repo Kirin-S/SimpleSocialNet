@@ -13,8 +13,10 @@ const Stack = createNativeStackNavigator();
 const News = ({ userData }: any) => {
   const [posts, setPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [wasLikeClick, setWasLikeClick] = useState(false);
 
   useEffect(() => {
+    console.log('TEST 1');
     setIsLoading(true);
 
     const posts: any = [];
@@ -43,9 +45,12 @@ const News = ({ userData }: any) => {
     });
 
     promise
-      .then((data: any) => setPosts(data))
+      .then((data: any) => {
+        console.log('TEST 2');
+        setPosts(data);
+      })
       .finally(() => setIsLoading(false))
-  }, [userData])
+  }, [userData, wasLikeClick])
 
   return (
     <Stack.Navigator initialRouteName='PostList'>
@@ -62,7 +67,7 @@ const News = ({ userData }: any) => {
               <Text style={styles.loaderText}>Loading</Text>
             </View>
           )
-          else return <PostList {...props} userData={userData} posts={posts} setPosts={setPosts} />
+          else return <PostList {...props} setWasLikeClick={setWasLikeClick} posts={posts} setPosts={setPosts} />
         }}
       </Stack.Screen>
       <Stack.Screen

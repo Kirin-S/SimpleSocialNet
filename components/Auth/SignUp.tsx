@@ -27,7 +27,7 @@ const SignUp = (props: ISignUpProps) => {
             .collection('Users')
             .doc(res.user.uid)
             .set({
-              nickname: '',
+              nickname: email,
               friends: []
             })
         })

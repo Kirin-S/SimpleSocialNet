@@ -1,5 +1,5 @@
 import { View, Text, StyleSheet } from 'react-native';
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState } from 'react';
 import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import { IconButton } from 'react-native-paper';
@@ -34,7 +34,8 @@ const People = ({ userData, setIsUserInfoChanged }: any) => {
 
         setUsers(arr);
       })
-  }, [userData])
+  }, [])
+
 
   return (
     <View style={styles.peopleScreen}>

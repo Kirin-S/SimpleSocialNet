@@ -18,10 +18,10 @@ interface IPost {
     creator: string;
   };
   setPosts: any;
-  userData: any;
+  setWasLikeClick: any;
 }
 
-const Post: FC<IPost> = ({ posts, post, setPosts, userData }) => {
+const Post: FC<IPost> = ({ posts, post, setPosts, setWasLikeClick }) => {
   const [isLoading, setIsLoading] = useState(false);
   
   const onLikeDislike = () => {
@@ -33,41 +33,16 @@ const Post: FC<IPost> = ({ posts, post, setPosts, userData }) => {
       .update({
         posts: posts.map((item: any) => {
           if (item.id === post.id) {
-            return {...item, like: isLike ? [...post.like, auth()?.currentUser?.uid] : [...post.like.filter((item: string) => item !== auth()?.currentUser?.uid)]}
+            return {
+              ...item,
+              like: isLike
+                ? [...post.like, auth()?.currentUser?.uid]
+                : [...post.like.filter((item: string) => item !== auth()?.currentUser?.uid)]
+            }
           } else return item;
         })
       })
-      .then(() => {
-        const posts: any = [];
-
-        const promise = new Promise((resolve, reject) => {
-          const users = [auth().currentUser?.uid, ...userData.friends];
-
-          users.forEach((id: string, index: number) => {
-            firestore()
-              .collection('News')
-              .doc(id)
-              .get()
-              .then(res => {
-                const data = res.data();
-
-                if (data?.posts) {
-                  posts.push(...data.posts);
-                }
-              })
-              .catch(err => reject(err))
-
-            if (index === users.length - 1) {
-              resolve(posts);
-            }
-          })
-        });
-
-        promise
-          .then((data: any) => setPosts(data))
-          .finally(() => setIsLoading(false))
-
-      })
+      .then(() => setWasLikeClick((prev: boolean) => !prev))
   }
 
   const onRemovePost = () => {
@@ -95,23 +70,15 @@ const Post: FC<IPost> = ({ posts, post, setPosts, userData }) => {
         })
       })
       .then(() => {
-        firestore()
-          .collection('News')
-          .doc(auth().currentUser?.uid)
-          .get()
-          .then(res => {
-            const data = res.data();
-            if (data?.posts) {
-              setPosts(data.posts);
-            }
-          });
+        setWasLikeClick((prev: boolean) => !prev)
       })
       .finally(() => setIsLoading(false));
   }
 
   return (
     <View style={!isLoading ? styles.post : {...styles.post, backgroundColor: '#bbb'}}>
-      <View style={styles.iconBox}>
+      <Text>asdf</Text>
+      {/* <View style={styles.iconBox}>
         <IconButton style={styles.remove} onPress={onRemovePost} icon={() => <Icons icon='remove' />} />
       </View>
       <View style={styles.postData}>
@@ -124,8 +91,12 @@ const Post: FC<IPost> = ({ posts, post, setPosts, userData }) => {
         />
         <Text style={styles.title}>{post.title}</Text>
         <Text style={styles.description} numberOfLines={2} ellipsizeMode='tail'>{post.description}</Text>
-        <IconButton style={styles.like} onPress={onLikeDislike} icon={() => <Icons icon={post.like.includes(auth()?.currentUser?.uid) ? 'heartRed' : 'heartOutlined'} />} />
-      </View>    
+        <IconButton
+          style={styles.like}
+          onPress={onLikeDislike}
+          icon={() => <Icons icon={post.like.includes(auth()?.currentUser?.uid) ? 'heartRed' : 'heartOutlined'} />}
+        />
+      </View> */}
     </View>
   )
 }

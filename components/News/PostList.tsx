@@ -3,12 +3,12 @@ import React from 'react';
 import Post from './Post';
 import { Button } from 'react-native-paper';
 
-const PostList = ({ navigation, posts, setPosts, userData }: any) => {
+const PostList = ({ navigation, posts, setPosts, setWasLikeClick }: any) => {
   return (
     <SafeAreaView style={styles.news}>
       <FlatList
         data={posts}
-        renderItem={({item}) => item.show && <Post userData={userData} posts={posts} post={item} setPosts={setPosts} />}
+        renderItem={({item}) => item.show && <Post setWasLikeClick={setWasLikeClick} posts={posts} post={item} setPosts={setPosts} />}
         keyExtractor={item => item.id}
       />
 
