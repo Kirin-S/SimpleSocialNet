@@ -5,7 +5,7 @@ import firestore from '@react-native-firebase/firestore';
 import { IconButton } from 'react-native-paper';
 import Icons from '../../UI/Icons/Icons';
 
-const People = ({ userData, setIsUserInfoChanged }: any) => {
+const People = ({ userData, setUserData }: any) => {
   const [users, setUsers] = useState([]);
 
   const onAddRemoveFriend = (id: string) => {
@@ -17,7 +17,9 @@ const People = ({ userData, setIsUserInfoChanged }: any) => {
       .update({
         friends: isAdd ? firestore.FieldValue.arrayUnion(id) : firestore.FieldValue.arrayRemove(id)
       })
-      .then(() => setIsUserInfoChanged((prev: boolean) => !prev))
+      .then(() => {
+        // adding/deleting locally
+      })
   }
 
 

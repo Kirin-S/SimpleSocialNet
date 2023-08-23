@@ -14,14 +14,14 @@ const NewPost = ({ navigation, setPosts, postsLength }: any) => {
     if (title && description) {
       firestore()
         .collection('News')
-        .doc(auth().currentUser?.uid)
+        .doc('Posts')
         .update({
           posts: firestore.FieldValue.arrayUnion({
             id: postsLength ? postsLength + 1 : 1,
             title: title,
             description: description,
             imgLink: link ? link : 'https://images.barrons.com/im-709895?width=639&size=1.5',
-            like: false,
+            like: [],
             show: true,
             creator: auth().currentUser?.uid
           })
@@ -29,7 +29,7 @@ const NewPost = ({ navigation, setPosts, postsLength }: any) => {
         .then(() => {
           firestore()
             .collection('News')
-            .doc(auth().currentUser?.uid)
+            .doc('Posts')
             .get()
             .then(res => {
               const data = res.data();

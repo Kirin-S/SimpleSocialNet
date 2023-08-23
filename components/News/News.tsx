@@ -3,54 +3,37 @@ import PostList from './PostList';
 import NewPost from './NewPost';
 import { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import auth from '@react-native-firebase/auth';
 import firestore from '@react-native-firebase/firestore';
 import { ActivityIndicator, MD2Colors } from 'react-native-paper';
 
 
 const Stack = createNativeStackNavigator();
 
-const News = ({ userData }: any) => {
+const News = () => {
   const [posts, setPosts] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [wasLikeClick, setWasLikeClick] = useState(false);
+  const [isError, setIsError] = useState(false);
 
   useEffect(() => {
-    console.log('TEST 1');
     setIsLoading(true);
 
-    const posts: any = [];
+    firestore()
+      .collection('News')
+      .doc('Posts')
+      .get()
+      .then(res => {
+        const data = res.data();
 
-    const promise = new Promise((resolve, reject) => {
-      const users = [auth().currentUser?.uid, ...userData.friends];
-
-      users.forEach((id: string, index: number) => {
-        firestore()
-          .collection('News')
-          .doc(id)
-          .get()
-          .then(res => {
-            const data = res.data();
-
-            if (data?.posts) {
-              posts.push(...data.posts);
-            }
-          })
-          .catch(err => reject(err))
-
-        if (index === users.length - 1) {
-          resolve(posts);
+        if (data?.posts) {
+          setPosts(data.posts);
         }
       })
-    });
-
-    promise
-      .then((data: any) => {
-        console.log('TEST 2');
-        setPosts(data);
+      .catch(err => {
+        setIsError(true);
+        console.log(err);
       })
       .finally(() => setIsLoading(false))
-  }, [userData, wasLikeClick])
+  }, [])
 
   return (
     <Stack.Navigator initialRouteName='PostList'>
@@ -67,7 +50,12 @@ const News = ({ userData }: any) => {
               <Text style={styles.loaderText}>Loading</Text>
             </View>
           )
-          else return <PostList {...props} setWasLikeClick={setWasLikeClick} posts={posts} setPosts={setPosts} />
+          else if (isError) return (
+            <View>
+              <Text style={styles.loaderText}>Got some error, try again later.</Text>
+            </View>
+          )
+          else return <PostList {...props} posts={posts} setPosts={setPosts} />
         }}
       </Stack.Screen>
       <Stack.Screen

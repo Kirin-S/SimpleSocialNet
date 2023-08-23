@@ -18,10 +18,9 @@ interface IPost {
     creator: string;
   };
   setPosts: any;
-  setWasLikeClick: any;
 }
 
-const Post: FC<IPost> = ({ posts, post, setPosts, setWasLikeClick }) => {
+const Post: FC<IPost> = ({ posts, post, setPosts }) => {
   const [isLoading, setIsLoading] = useState(false);
   
   const onLikeDislike = () => {
@@ -29,7 +28,7 @@ const Post: FC<IPost> = ({ posts, post, setPosts, setWasLikeClick }) => {
 
     firestore()
       .collection('News')
-      .doc(post.creator)
+      .doc('Posts')
       .update({
         posts: posts.map((item: any) => {
           if (item.id === post.id) {
@@ -42,7 +41,16 @@ const Post: FC<IPost> = ({ posts, post, setPosts, setWasLikeClick }) => {
           } else return item;
         })
       })
-      .then(() => setWasLikeClick((prev: boolean) => !prev))
+      .then(() => setPosts((prev: any) => prev.map((item: any) => {
+        if (item.id === post.id) {
+          return {
+            ...item,
+            like: isLike
+              ? [...post.like, auth()?.currentUser?.uid]
+              : [...post.like.filter((item: string) => item !== auth()?.currentUser?.uid)]
+          }
+        } else return item;
+      })))
   }
 
   const onRemovePost = () => {
@@ -61,7 +69,7 @@ const Post: FC<IPost> = ({ posts, post, setPosts, setWasLikeClick }) => {
     
     firestore()
       .collection('News')
-      .doc(auth().currentUser?.uid)
+      .doc('Posts')
       .update({
         posts: posts.map((item: any) => {
           if (item.id === post.id) {
@@ -70,15 +78,18 @@ const Post: FC<IPost> = ({ posts, post, setPosts, setWasLikeClick }) => {
         })
       })
       .then(() => {
-        setWasLikeClick((prev: boolean) => !prev)
+        setPosts((prev: any) => prev.map((item: any) => {
+          if (item.id === post.id) {
+            return {...item, show: false}
+          } else return item;
+        }))
       })
       .finally(() => setIsLoading(false));
   }
 
   return (
     <View style={!isLoading ? styles.post : {...styles.post, backgroundColor: '#bbb'}}>
-      <Text>asdf</Text>
-      {/* <View style={styles.iconBox}>
+      <View style={styles.iconBox}>
         <IconButton style={styles.remove} onPress={onRemovePost} icon={() => <Icons icon='remove' />} />
       </View>
       <View style={styles.postData}>
@@ -96,7 +107,7 @@ const Post: FC<IPost> = ({ posts, post, setPosts, setWasLikeClick }) => {
           onPress={onLikeDislike}
           icon={() => <Icons icon={post.like.includes(auth()?.currentUser?.uid) ? 'heartRed' : 'heartOutlined'} />}
         />
-      </View> */}
+      </View>
     </View>
   )
 }

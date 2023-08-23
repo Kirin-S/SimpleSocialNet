@@ -16,7 +16,6 @@ function App() {
   const [user, setUser] = useState<any>(null);
   const [index, setIndex] = useState(0);
   const [userData, setUserData] = useState({});
-  const [isUserInfoChanged, setIsUserInfoChanged] = useState(false);
 
   const routes = [
     { key: 'news', title: 'News', focusedIcon: () => <Icons icon='news' />, unfocusedIcon: () => <Icons icon='newsOutlined' /> },
@@ -26,8 +25,8 @@ function App() {
   ];
 
   const renderScene = BottomNavigation.SceneMap({
-    news: () => <News userData={userData} />,
-    people: () => <People userData={userData} setIsUserInfoChanged={setIsUserInfoChanged} />,
+    news: () => <News />,
+    people: () => <People userData={userData} setUserData={setUserData} />,
     profile: () => <Profile userData={userData} setUserData={setUserData} />,
     settings: () => <Settings />
   });
@@ -55,7 +54,7 @@ function App() {
           setUserData(data);
         }
       });
-  }, [user, isUserInfoChanged])
+  }, [user])
 
   if (initializing) return null;
 
